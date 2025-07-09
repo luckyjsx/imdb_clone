@@ -38,7 +38,7 @@ export default function Index() {
           ) : moviesError || trendingError? (
             <Text className="text-lg text-white font-bold mt-5 mb-3">Error: {moviesError?.message || trendingError?.message}</Text>
           ) : (
-            <View className="flex-1 mt-5">
+            <View className="flex-1 mt-5 overflow-x-hidden">
               <SearchBar onPress={() => router.push("/search")}
                 placeholder="Search for a movie"
               />
@@ -67,6 +67,7 @@ export default function Index() {
                 renderItem={({ item }) => (
                   <MovieCard
                     {...item}
+                    showAddFav
                   />
                 )}
                 keyExtractor={(item) => item.id.toString()}

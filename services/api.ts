@@ -1,24 +1,13 @@
 export const    TMDB_CONFIG = {
     BASE_URL:'https://api.themoviedb.org/3/',
-    API_KEY: process.env.EXPO_PUBLIC_MOVIE_API_KEY,
-    headers:{
-        accept:'application/json',
-        Authorization: `Bearer ${process.env.EXPO_PUBLIC_MOVIE_API_KEY}`
-    }
-}
-const url = 'https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1';
-const options = {
-  method: 'GET',
+  API_KEY: process.env.EXPO_PUBLIC_MOVIE_API_KEY,
   headers: {
-    accept: 'application/json',
-    Authorization: 'Bearer afc820b74527d047fca543ea9b25930e'
-  }
+  accept: 'application/json',
+  'content-type': 'application/json',
+  Authorization: `Bearer ${process.env.EXPO_PUBLIC_MOVIE_API_KEY}`,
+},
+  Account_id: process.env.EXPO_PUBLIC_ACCOUNT_ID,
 };
-
-fetch(url, options)
-  .then(res => res.json())
-  .then(json => console.log(json))
-  .catch(err => console.error(err));
 
   export const fetchMovies = async ({query}:{query:string}) => {
     const endpoint = query ? `${TMDB_CONFIG.BASE_URL}/search/movie?query=${encodeURIComponent(query)}`: `${TMDB_CONFIG.BASE_URL}/discover/movie?sort_by=popularity.desc`
@@ -29,25 +18,72 @@ fetch(url, options)
 
     if(!response.ok){
         throw new Error('Failed to fetch movies')
-    }
-
+  }
+    
     const data = await response.json();
     return data.results
   }
 
   export const fetchMovieDetails = async (movieId:string):Promise<MovieDetails> => {
-    try {
+  try {
       const response = await fetch(`${TMDB_CONFIG.BASE_URL}/movie/${movieId}?.api_key=${TMDB_CONFIG.API_KEY}`,{
         method:'GET',
         headers: TMDB_CONFIG.headers
       })
 
-      if(!response.ok) throw new Error('Failed to fetch movie details')
+    if(!response.ok) throw new Error('Failed to fetch movie details')
 
-      const data = await response.json();
-      return data
-    } catch (error) {
-      console.log(error)
-      throw error
+    const data = await response.json();
+        return data
+  } catch (error) {
+    console.log(error)
+    throw error
     }
   }
+
+export const addToFavorite = async (movieId: number,addToFav:boolean): Promise<MovieDetails> => {
+  try {
+
+    const response = await fetch(
+      `${TMDB_CONFIG.BASE_URL}/account/${TMDB_CONFIG.Account_id}/favorite`,
+      {
+        method: "POST",
+        headers: TMDB_CONFIG.headers,
+        body: JSON.stringify({
+          media_type: "movie",
+          media_id: movieId,
+          favorite: addToFav,
+        }),
+      }
+    );
+
+    
+    if (!response.ok) throw new Error("Failed to fetch movie details");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+
+export const fetchFavoriteMovies = async (): Promise<MovieDetails> => {
+  try {
+    const response = await fetch(
+      `${TMDB_CONFIG.BASE_URL}/account/${TMDB_CONFIG.Account_id}/favorite/movies`,
+      {
+        method: "GET",
+        headers: TMDB_CONFIG.headers,
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch movie details");
+
+    const data = await response.json();
+    return data?.results;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
